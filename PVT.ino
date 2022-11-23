@@ -3,17 +3,37 @@
 #include <DallasTemperature.h>
 #include <Servo.h>
 
-#define ONE_WIRE_BUS 2
+#define ONE_WIRE_BUS_1 2
+#define ONE_WIRE_BUS_2 3
+#define ONE_WIRE_BUS_3 4
 const int input = A0;
+const int solenoid = 7;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
+
+OneWire oneWire1(ONE_WIRE_BUS_1);
+OneWire oneWire2(ONE_WIRE_BUS_2);
+OneWire oneWire3(ONE_WIRE_BUS_3);
+
+DallasTemperature sensor1(&oneWire1);
+DallasTemperature sensor2(&oneWire2);
+DallasTemperature sensor3(&oneWire3);
+
 Servo myservo;
 
-float get_temp() {
-  sensors.requestTemperatures();
-  return sensors.getTempCByIndex(0);
+float get_temp1() {
+  sensor1.requestTemperatures();
+  return sensor1.getTempCByIndex(0);
+}
+
+float get_temp2() {
+  sensor2.requestTemperatures();
+  return sensor2.getTempCByIndex(0);
+}
+
+float get_temp3() {
+  sensor3.requestTemperatures();
+  return sensor3.getTempCByIndex(0);
 }
 
 void servo(int angle) {
@@ -34,26 +54,52 @@ float get_flowrate() {
   TIME = X + Y;
   FREQUENCY = 1000000 / TIME;
   WATER = FREQUENCY / 7.5;
-  LS = WATER / 60;
+  LS = WATER;
   return LS;
 }
 
+void valve(int state)
+{
+  digitalWrite(solenoid, state);
+}
 
 void setup() {
+  Serial.begin(9600);
   lcd.init();
   lcd.backlight();
   Serial.begin(9600);
   pinMode(input, INPUT);
   myservo.attach(9);
+  pinMode(solenoid, OUTPUT);
 }
 
 void loop() {
-lcd.setCursor(0,0);
-lcd.print("T = ");
-lcd.print(get_temp());
-lcd.setCursor(0,1);
-lcd.print("Q = ");
-lcd.print(get_flowrate());
+  float T1 = get_temp1();
+  float T2 = get_temp1();
+  float T3 = get_temp1();
+  float Q = get_flowrate();
 
-delay(1000);
+  if(T2>=45)
+  {
+    valve(1);
+    servo(45);
+  }
+
+  if(T2<=30)
+  {
+    valve(0);
+    servo(0);
+  }
+  
+  Serial.print("T1 = ");
+  Serial.print(T1));
+  Serial.print(", T2 = ");
+  Serial.print(T2);
+  Serial.print(", T3 = ");
+  Serial.print(T3);
+  Serial.print(", Q = ");
+  Serial.print(Q);
+  Serial.println(" L/min");
+
+  delay(1000);
 }
