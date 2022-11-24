@@ -3,37 +3,45 @@
 #include <DallasTemperature.h>
 #include <Servo.h>
 
-#define ONE_WIRE_BUS_1 2
-#define ONE_WIRE_BUS_2 3
-#define ONE_WIRE_BUS_3 4
+#define ONE_WIRE_BUS 2
 const int input = A0;
 const int solenoid = 7;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-OneWire oneWire1(ONE_WIRE_BUS_1);
-OneWire oneWire2(ONE_WIRE_BUS_2);
-OneWire oneWire3(ONE_WIRE_BUS_3);
+OneWire oneWire(ONE_WIRE_BUS);
 
-DallasTemperature sensor1(&oneWire1);
-DallasTemperature sensor2(&oneWire2);
-DallasTemperature sensor3(&oneWire3);
+DallasTemperature sensor(&oneWire);
+
+DeviceAddress Thermometer;
 
 Servo myservo;
 
 float get_temp1() {
-  sensor1.requestTemperatures();
-  return sensor1.getTempCByIndex(0);
+  sensor.requestTemperatures();
+  return sensor.getTempCByIndex(0);
 }
 
 float get_temp2() {
-  sensor2.requestTemperatures();
-  return sensor2.getTempCByIndex(0);
+  sensor.requestTemperatures();
+  return sensor.getTempCByIndex(1);
 }
 
 float get_temp3() {
-  sensor3.requestTemperatures();
-  return sensor3.getTempCByIndex(0);
+  sensor.requestTemperatures();
+  return sensor.getTempCByIndex(2);
+}
+
+void printAddress(DeviceAddress deviceAddress)
+{
+  for (uint8_t i = 0; i < 8; i++)
+  {
+    Serial.print("0x");
+    if (deviceAddress[i] < 0x10) Serial.print("0");
+    Serial.print(deviceAddress[i], HEX);
+    if (i < 7) Serial.print(", ");
+  }
+  Serial.println("");
 }
 
 void servo(int angle) {
@@ -71,28 +79,47 @@ void setup() {
   pinMode(input, INPUT);
   myservo.attach(9);
   pinMode(solenoid, OUTPUT);
+  sensor.begin();
+
+  Serial.println("Locating devices...");
+  Serial.print("Found ");
+  int deviceCount = sensor.getDeviceCount();
+  Serial.print(deviceCount, DEC);
+  Serial.println(" devices.");
+  Serial.println("");
+
+  Serial.println("Printing addresses...");
+  for (int i = 0;  i < deviceCount;  i++)
+  {
+    Serial.print("Sensor ");
+    Serial.print(i + 1);
+    Serial.print(" : ");
+    sensor.getAddress(Thermometer, i);
+    printAddress(Thermometer);
+  }
 }
+
 
 void loop() {
   float T1 = get_temp1();
-  float T2 = get_temp1();
-  float T3 = get_temp1();
+  float T2 = get_temp2();
+  float T3 = get_temp3();
   float Q = get_flowrate();
 
-  if(T2>=45)
+  if (T2 >= 45)
   {
     valve(1);
     servo(45);
   }
 
-  if(T2<=30)
+  if (T2 <= 30)
   {
     valve(0);
     servo(0);
   }
-  
+
   Serial.print("T1 = ");
-  Serial.print(T1));
+  Serial.print(T1);
   Serial.print(", T2 = ");
   Serial.print(T2);
   Serial.print(", T3 = ");
