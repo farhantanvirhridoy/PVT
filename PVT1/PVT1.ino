@@ -6,7 +6,7 @@
 #define ONE_WIRE_BUS_1 2
 #define ONE_WIRE_BUS_2 3
 #define ONE_WIRE_BUS_3 4
-const int input = A0;
+const int inputQ = A0;
 const int solenoid = 7;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -43,8 +43,8 @@ float get_flowrate() {
   float FREQUENCY = 0;
   float WATER = 0;
   float LS = 0;
-  X = pulseIn(input, HIGH);
-  Y = pulseIn(input, LOW);
+  X = pulseIn(inputQ, HIGH);
+  Y = pulseIn(inputQ, LOW);
   TIME = X + Y;
   FREQUENCY = 1000000 / TIME;
   WATER = FREQUENCY / 7.5;
@@ -57,9 +57,9 @@ void servo(int angle) {
   myservo.write(angle);
 }
 
-void valve(int state)
+void valve(bool state)
 {
-  digitalWrite(solenoid, state);
+  digitalWrite(solenoid, !state);
 }
 
 void setup() {
@@ -67,7 +67,7 @@ void setup() {
   lcd.init();
   lcd.backlight();
   Serial.begin(9600);
-  pinMode(input, INPUT);
+  pinMode(inputQ, INPUT);
   myservo.attach(9);
   pinMode(solenoid, OUTPUT);
 }
