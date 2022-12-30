@@ -52,9 +52,9 @@ float get_flowrate() {
   return LS;
 }
 
-void servo(int angle) {
+void servo(int mili) {
 
-  myservo.write(angle);
+  myservo.writeMicroseconds(mili);
 }
 
 void valve(bool state)
@@ -81,7 +81,7 @@ void loop() {
   if (T2 >= 45)
   {
     valve(1);
-    servo(45);
+    servo(2000);
   }
   else
   {
