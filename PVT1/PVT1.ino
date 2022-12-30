@@ -83,7 +83,7 @@ void loop() {
     valve(1);
     servo(45);
   }
-  else if (T2 >= 30.0)
+  else if (T2 >= 30.0 && T2<45)
   {
     valve(1);
     servo(0);
