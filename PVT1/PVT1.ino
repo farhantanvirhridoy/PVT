@@ -85,7 +85,7 @@ void loop() {
   }
   else
   {
-    servo(0);
+    
   }
 
   if (T2 < 30)
