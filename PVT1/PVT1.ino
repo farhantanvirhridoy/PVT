@@ -53,9 +53,8 @@ float get_flowrate() {
 }
 
 void servo(int angle) {
-  int val;
-  val = map(angle, 0, 1023, 0, 180);
-  myservo.write(val);
+  
+  myservo.write(angle);
 }
 
 void valve(int state)
