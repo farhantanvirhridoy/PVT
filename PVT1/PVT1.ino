@@ -53,7 +53,7 @@ float get_flowrate() {
 }
 
 void servo(int angle) {
-  
+
   myservo.write(angle);
 }
 
@@ -78,13 +78,17 @@ void loop() {
   float T3 = get_temp3();
   float Q = get_flowrate();
 
-  if(T2>=45)
+  if (T2 >= 45.0)
   {
     valve(1);
     servo(45);
   }
-
-  if(T2<=30)
+  else if (T2 >= 30.0)
+  {
+    valve(1);
+    servo(0);
+  }
+  else
   {
     valve(0);
     servo(0);
